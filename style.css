@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0f0f14;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.toolbar {
+  margin-bottom: 10px;
+}
+
+button {
+  border: none;
+  padding: 6px 10px;
+  margin: 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+canvas {
+  background: white;
+  border-radius: 10px;
+  border: 3px solid #333;
+}
