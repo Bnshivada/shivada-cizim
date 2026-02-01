@@ -71,37 +71,13 @@ ws.on("message", (data) => {
   const content = contentMatch[1].toLowerCase();
   const username = userMatch[1];
 
-  /* ============================
-     1) !eşle SİSTEMİ
-  ============================ */
+let foundUser = null;
 
-  const match = content.match(/!eşle\s+([a-z0-9]{6})/i);
-  if (match) {
-    const code = match[1].toUpperCase();
+app.post("/api/found", (req, res) => {
+  foundUser = req.body.user;
+  res.json({ ok: true });
+});
 
-    if (rooms[code]) {
-      rooms[code].username = username;
-      saveRooms();
-      console.log(`🔗 EŞLEŞTİ: ${code} -> ${username}`);
-    }
-  }
-
-  /* ============================
-     2) TAHMİN SİSTEMİ
-  ============================ */
-
-  if (content === currentWord) {
-    console.log(`🎉 DOĞRU TAHMİN: ${username}`);
-
-    // hangi kodda olduğunu bul
-    for (const code in rooms) {
-      if (rooms[code].username) {
-        if (!rooms[code].guessedBy.includes(username)) {
-          rooms[code].guessedBy.push(username);
-          saveRooms();
-          console.log(`⭐ ${username} puan aldı (${code})`);
-        }
-      }
-    }
-  }
+app.get("/api/found", (req, res) => {
+  res.json({ user: foundUser });
 });
