@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Shivada Draw</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loginScreen" class="login">
+  <h1>Hoşgeldin 👋</h1>
+  <p>Kodun: <span id="codeBox"></span></p>
+  <p>Kick chatine yaz: <b>!eşle <span id="codeBox2"></span></b></p>
+  <button id="startBtn">Bağlanmayı Bekle...</button>
+</div>
+
+<div id="gameScreen" class="game hidden">
+
+  <!-- SOL PANEL -->
+  <div class="leftPanel">
+    <div class="wordBox">
+      Kelime: <span id="word"></span>
+    </div>
+
+    <div class="colorPickerBox">
+      <input type="color" id="colorPicker">
+    </div>
+  </div>
+
+  <!-- ORTA ÇİZİM -->
+  <div class="canvasArea">
+    <div class="canvasFrame">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="tools">
+      <button onclick="setTool('pen')">Kalem</button>
+      <button onclick="setTool('eraser')">Silgi</button>
+      <button onclick="undo()">Geri Al</button>
+      <button onclick="clearCanvas()">Temizle</button>
+
+      <div>Kalınlık <input type="range" min="1" max="50" value="6" onchange="setSize(this.value)"></div>
+      <div>Opaklık <input type="range" min="0.1" max="1" step="0.1" value="1" onchange="setOpacity(this.value)"></div>
+    </div>
+  </div>
+
+  <!-- SAĞ CHAT -->
+  <div class="chatPanel">
+    <iframe id="chatFrame" src="https://kick.com/shivada/chatroom"></iframe>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
