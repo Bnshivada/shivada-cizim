@@ -1,76 +1,133 @@
-
-// RANDOM KOD
-function generateCode() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  return Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join("");
-}
-
-const myCode = generateCode();
-document.getElementById("codeBox").innerText = myCode;
-document.getElementById("codeBox2").innerText = myCode;
-
-// Kelime
-const words = ["pasta","karpuz","araba","kedi","telefon","uçak","pizza"];
-document.getElementById("word").innerText = words[Math.floor(Math.random()*words.length)];
-
-// Backend'e kod sor
+/********************
+  RANDOM CODE (backend’den)
+*********************/
+let currentCode = null;
 let linkedUser = null;
 
-setInterval(async () => {
-  const res = await fetch("http://localhost:3000/check-code", {
+// backend’den kod al
+async function getCode() {
+  const res = await fetch("http://localhost:3000/api/code");
+  const data = await res.json();
+  currentCode = data.code;
+
+  document.getElementById("codeBox").innerText = currentCode;
+}
+
+getCode();
+
+/********************
+  KELİME SİSTEMİ
+*********************/
+const words = ["pasta","karpuz","araba","kedi","telefon","uçak","pizza"];
+
+const currentWord = words[Math.floor(Math.random() * words.length)];
+document.getElementById("word").innerText = currentWord;
+
+// kelimeyi backend’e gönder
+async function sendWord(word) {
+  await fetch("http://localhost:3000/api/word", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({code: myCode})
+    body: JSON.stringify({ word })
   });
+}
 
+sendWord(currentWord);
+
+/********************
+  KICK EŞLEŞME KONTROLÜ
+*********************/
+async function checkRoom() {
+  if (!currentCode) return;
+
+  const res = await fetch(`http://localhost:3000/api/room/${currentCode}`);
   const data = await res.json();
 
-  if (data.user && data.user !== linkedUser) {
-    linkedUser = data.user;
+  if (data.username && data.username !== linkedUser) {
+    linkedUser = data.username;
 
+    // login ekranını kapat, oyunu aç
     document.getElementById("loginScreen").classList.add("hidden");
     document.getElementById("gameScreen").classList.remove("hidden");
 
+    // chat iframe değiştir
     document.getElementById("chatFrame").src =
       `https://kick.com/${linkedUser}/chatroom`;
-  }
-}, 2000);
 
-// CANVAS
+    console.log("✅ Kick hesabı bağlandı:", linkedUser);
+  }
+
+  setTimeout(checkRoom, 2000);
+}
+
+checkRoom();
+
+/********************
+  CANVAS (ÇİZİM SİSTEMİ)
+*********************/
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 1200;
-canvas.height = 700;
+// responsive canvas
+function resizeCanvas() {
+  canvas.width = 1200;
+  canvas.height = 700;
+}
+resizeCanvas();
 
-let drawing=false, color="#000", size=6, opacity=1, tool="pen", history=[];
+let drawing = false;
+let color = "#000000";
+let size = 6;
+let opacity = 1;
+let tool = "pen";
+let history = [];
 
-document.getElementById("colorPicker").addEventListener("input", e => color=e.target.value);
+// renk seçici
+document.getElementById("colorPicker").addEventListener("input", e => {
+  color = e.target.value;
+});
 
-function setTool(t){tool=t;}
-function setSize(s){size=s;}
-function setOpacity(o){opacity=o;}
+function setTool(t) { tool = t; }
+function setSize(s) { size = s; }
+function setOpacity(o) { opacity = o; }
 
-canvas.addEventListener("mousedown", ()=>{drawing=true; history.push(canvas.toDataURL());});
-canvas.addEventListener("mouseup", ()=>{drawing=false; ctx.beginPath();});
+// mouse events
+canvas.addEventListener("mousedown", () => {
+  drawing = true;
+  history.push(canvas.toDataURL());
+});
+
+canvas.addEventListener("mouseup", () => {
+  drawing = false;
+  ctx.beginPath();
+});
+
 canvas.addEventListener("mousemove", draw);
 
-function draw(e){
-  if(!drawing)return;
-  ctx.lineWidth=size;
-  ctx.lineCap="round";
-  ctx.globalAlpha=opacity;
-  ctx.strokeStyle=(tool==="eraser"?"white":color);
-  ctx.lineTo(e.offsetX,e.offsetY);
+function draw(e) {
+  if (!drawing) return;
+
+  ctx.lineWidth = size;
+  ctx.lineCap = "round";
+  ctx.globalAlpha = opacity;
+
+  ctx.strokeStyle = (tool === "eraser") ? "white" : color;
+
+  ctx.lineTo(e.offsetX, e.offsetY);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(e.offsetX,e.offsetY);
+  ctx.moveTo(e.offsetX, e.offsetY);
 }
 
-function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);}
-function undo(){
-  if(!history.length)return;
-  const img=new Image();
-  img.src=history.pop();
-  img.onload=()=>ctx.drawImage(img,0,0);
+// temizle
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// geri al
+function undo() {
+  if (!history.length) return;
+  const img = new Image();
+  img.src = history.pop();
+  img.onload = () => ctx.drawImage(img, 0, 0);
 }
